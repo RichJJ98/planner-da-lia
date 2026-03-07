@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lia's Lab Planner 🧪</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pink-primary: #ff4b8a;
+            --science-blue: #4ba3ff;
+            --bg-light: #fdf6f9;
+            --bg-dark: #1a1a2e;
+            --font-main: 'Quicksand', sans-serif;
+        }
+
+        /* --- TELA DE CARREGAMENTO (SPLASH) --- */
+        #loader {
+            position: fixed; width: 100%; height: 100%; background: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000; transition: opacity 0.6s ease;
+        }
+        #loader img { width: 140px; border-radius: 20px; }
+        #loader p { font-family: var(--font-main); color: var(--pink-primary); font-weight: 700; margin-top: 15px; letter-spacing: 1px; }
+
+        body {
+            margin: 0; font-family: var(--font-main);
+            background: var(--bg-light); color: #333;
+            transition: background 0.5s, color 0.5s; min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* CONFIGURAÇÕES DO MODO NOTURNO */
+        .dark { background: var(--bg-dark); color: #e0e0e0; }
+        .dark header, .dark .habits-container, .dark .task-row { 
+            background: #252545; color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .dark input { color: white; }
+        .dark button { background: #32325d; color: #ff80ab; }
+
+        header {
+            background: white; padding: 25px 15px;
+            box-shadow: 0 4px 25px rgba(255, 75, 138, 0.12);
+            position: sticky; top: 0; z-index: 100; text-align: center;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+        }
+
+        h1 { font-size: 1.4rem; margin: 0; color: var(--pink-primary); font-weight: 700; }
+
+        .progress-container {
+            width: 80%; background: #eee; height: 10px; border-radius: 20px;
+            margin: 15px auto; overflow: hidden;
+        }
+        #progress-bar {
+            width: 0%; height: 100%; background: linear-gradient(90deg, #ff80ab, var(--pink-primary));
+            transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* GIF DORMIR */
+        #kitty-sleep { 
+            display: none; width: 110px; margin: 15px auto; 
+            border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+
+        .habits-container {
+            background: white; margin: 20px 15px; padding: 20px;
+            border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        }
+
+        .menu {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 12px; padding: 15px; max-width: 500px; margin: auto;
+        }
+
+        button {
+            background: white; border: none; padding: 16px;
+            border-radius: 20px; font-family: var(--font-main); font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: var(--pink-primary); transition: transform 0.2s, background 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+
+        .task-row {
+            display: flex; align-items: center; background: white;
+            margin-bottom: 12px; padding: 16px; border-radius: 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .task-row input[type="text"] {
+            flex: 1; border: none; background: transparent; outline: none;
+            margin-left: 12px; font-family: var(--font-main); font-size: 1rem;
+        }
+
+        .done { text-decoration: line-through; opacity: 0.35; filter: grayscale(1); }
+
+        /* KITTY FLUTUANTE */
+        .kitty-float {
+            position: fixed; bottom: 25px; left: 25px; width: 65px;
+            z-index: 999; cursor: pointer; filter: drop-shadow(0 8px 15px rgba(255, 75, 138, 0.3));
+        }
+        .jump { animation: jumpAnim 0.6s ease; }
+        @keyframes jumpAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-45px) rotate(8deg); } }
+
+        /* FEEDBACK VISUAL */
+        .pop-text {
+            position: fixed; font-weight: bold; color: var(--pink-primary);
+            pointer-events: none; z-index: 10000; animation: popUp 1s forwards;
+            font-size: 1.2rem;
+        }
+        @keyframes popUp { 
+            0% { opacity:0; transform: translateY(0); } 
+            50% { opacity:1; } 
+            100% { opacity:0; transform: translateY(-50px); } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <img src="https://media.tenor.com/7YV8-f4uB_oAAAAM/hello-kitty-excited.gif" alt="Loading">
+    <p>Sincronizando elétrons... ⚡</p>
+</div>
+
+<header>
+    <h1 id="main-title">🧪 Lia's Lab Planner 🎀</h1>
+    <div class="progress-container"><div id="progress-bar"></div></div>
+    
+    <img id="kitty-sleep" src="https://i.pinimg.com/originals/a3/56/1d/a3561dce1aa8b0107ce7f52bbfb05d06.gif">
+
+    <div id="motivation-msg" style="font-size: 14px; color: #888; font-weight: 700; margin: 10px 0; min-height: 20px;"></div>
+
+    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 5px;">
+        <button onclick="toggleDark()" style="font-size: 13px; padding: 10px 15px;">🌙 Modo Soneca</button>
+        <button onclick="syncCloud()" style="background:var(--pink-primary); color:white; font-size: 13px; padding: 10px 15px;">☁️ Backup</button>
+    </div>
+</header>
+
+<div id="home-view">
+    <div class="habits-container">
+        <h3 style="margin:0 0 15px 0; color:var(--pink-primary); font-size: 1.1rem;">🔬 Reações de Hoje</h3>
+        <div id="habits-list"></div>
+    </div>
+    <div class="menu" id="day-menu"></div>
+</div>
+
+<div id="planner" style="display:none; padding: 15px;">
+    <h2 id="title" style="text-align:center; color:var(--pink-primary); font-weight: 700;"></h2>
+    <div id="task-list"></div>
+    <button onclick="goBack()" style="width:100%; margin-top:25px; background:#f0f0f0; color:#666;">🔙 Menu Inicial</button>
+</div>
+
+<img class="kitty-float" id="kitty-main" src="https://raw.githubusercontent.com/Arkanon/hello-kitty/master/hello-kitty.png" onclick="kittyJump()">
+
+<script>
+    const hours = ["08:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00"];
+    const habits = ["Beber H2O 💧", "Skincare 🧴", "Estudo Químico 📖", "Organizar Lab ✨"];
+    const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+    let currentDay = "";
+
+    window.onload = () => {
+        // Remove tela de loading
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 600);
+        }, 1800);
+
+        checkEvents();
+        renderMenu();
+        renderHabits();
+        updateProgress();
+    };
+
+    function renderMenu() {
+        const menu = document.getElementById('day-menu');
+        menu.innerHTML = "";
+        days.forEach(d => {
+            let btn = document.createElement('button');
+            btn.innerText = d;
+            btn.onclick = () => openDay(d);
+            menu.appendChild(btn);
+        });
+    }
+
+    function checkEvents() {
+        const now = new Date();
+        const m = now.getMonth() + 1;
+        const d = now.getDate();
+        const title = document.getElementById('main-title');
+        const msg = document.getElementById('motivation-msg');
+
+        const sciencePhrases = [
+            "Lia, você é a solução perfeita! 🧪",
+            "Mantenha a energia de ativação! ⚡",
+            "Equilibrando a vida com doçura... ⚖️",
+            "Pronta para novos experimentos? ✨",
+            "Você brilha mais que reações de luminescência! 💎"
+        ];
+        
+        let selectedMsg = sciencePhrases[Math.floor(Math.random() * sciencePhrases.length)];
+
+        // DATAS ESPECIAIS
+        if (m === 10 && d === 24) {
+            title.innerText = "🎂 HAPPY B-DAY LIA! 🥳";
+            selectedMsg = "Parabéns, Engenheira! Muitas fórmulas de amor! 💖";
+            confettiEffect();
+        } else if (m === 6 && d === 18) {
+            title.innerText = "🧪 Dia do Químico! ⚗️";
+            selectedMsg = "Parabéns pela sua profissão incrível! 🧬";
+        } else if (m === 12 && d >= 24) {
+            title.innerText = "🎄 Lia's Xmas Lab 🎅";
+        }
+
+        msg.innerText = selectedMsg;
+    }
+
+    function toggleDark() {
+        const isDark = document.body.classList.toggle("dark");
+        document.getElementById('kitty-sleep').style.display = isDark ? "block" : "none";
+    }
+
+    function renderHabits() {
+        let html = "";
+        habits.forEach(h => {
+            let checked = localStorage.getItem('habit_'+h) === 'true';
+            html += `<div class="habit-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
+                <span style="font-weight:600;">${h}</span>
+                <input type="checkbox" style="width:22px; height:22px; accent-color:var(--pink-primary);" ${checked ? 'checked' : ''} onclick="toggleHabit('${h}')">
+            </div>`;
+        });
+        document.getElementById('habits-list').innerHTML = html;
+    }
+
+    function toggleHabit(h) {
+        let val = localStorage.getItem('habit_'+h) === 'true';
+        localStorage.setItem('habit_'+h, !val);
+        updateProgress();
+        if(!val) { kittyJump(); showPoint(); }
+    }
+
+    function openDay(day) {
+        currentDay = day;
+        document.getElementById('home-view').style.display = "none";
+        document.getElementById('planner').style.display = "block";
+        document.getElementById('title').innerText = "🔬 " + day;
+        renderTasks();
+    }
+
+    function renderTasks() {
+        let html = "";
+        hours.forEach((h, i) => {
+            let val = localStorage.getItem(currentDay + i) || "";
+            let done = localStorage.getItem(currentDay + i + '_done') === 'true';
+            html += `<div class="task-row">
+                <input type="checkbox" style="width:20px; height:20px; accent-color:var(--pink-primary);" ${done ? 'checked' : ''} onchange="toggleTask(${i}, this)">
+                <input type="text" class="${done ? 'done' : ''}" value="${val}" placeholder="${h}..." oninput="saveTask(${i}, this.value)">
+            </div>`;
+        });
+        document.getElementById('task-list').innerHTML = html;
+    }
+
+    function toggleTask(i, el) {
+        localStorage.setItem(currentDay + i + '_done', el.checked);
+        el.nextElementSibling.classList.toggle('done');
+        updateProgress();
+        if(el.checked) { kittyJump(); showPoint(); }
+    }
+
+    function updateProgress() {
+        let total = habits.length + (currentDay ? hours.length : 0);
+        let done = habits.filter(h => localStorage.getItem('habit_'+h) === 'true').length;
+        if(currentDay) {
+            hours.forEach((_, i) => { if(localStorage.getItem(currentDay + i + '_done') === 'true') done++; });
+        }
+        let perc = (done / total) * 100 || 0;
+        document.getElementById('progress-bar').style.width = perc + "%";
+    }
+
+    function kittyJump() {
+        const k = document.getElementById('kitty-main');
+        k.classList.add('jump');
+        setTimeout(() => k.classList.remove('jump'), 600);
+    }
+
+    function showPoint() {
+        const p = document.createElement("div");
+        p.className = "pop-text";
+        p.innerText = "⭐ +10 pts";
+        p.style.left = "50%"; p.style.top = "50%";
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1000);
+    }
+
+    function goBack() {
+        document.getElementById('home-view').style.display = "block";
+        document.getElementById('planner').style.display = "none";
+        currentDay = "";
+        updateProgress();
+    }
+
+    function saveTask(i, v) { localStorage.setItem(currentDay + i, v); }
+
+    function syncCloud() {
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(localStorage))));
+        navigator.clipboard.writeText(window.location.href.split('?')[0] + "?data=" + encoded);
+        alert("🧪 Reação Estabilizada! Link de backup copiado para a área de transferência.");
+    }
+
+    function confettiEffect() {
+        for(let i=0; i<15; i++) {
+            let c = document.createElement("div");
+            c.innerText = "🎉";
+            c.style.position = "fixed";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.top = "-20px";
+            c.style.fontSize = "25px";
+            c.style.transition = "transform 3s linear";
+            document.body.appendChild(c);
+            setTimeout(() => c.style.transform = `translateY(${window.innerHeight + 50}px)`, 100);
+            setTimeout(() => c.remove(), 3500);
+        }
+    }
+</script>
+</body>
+</html>
