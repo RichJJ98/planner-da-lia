@@ -3,323 +3,552 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lia's Lab Planner 🧪</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <title>Lia's Kitty Lab Pro 🧪🎀🤓</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pink-primary: #ff4b8a;
-            --science-blue: #4ba3ff;
-            --bg-light: #fdf6f9;
-            --bg-dark: #1a1a2e;
+            --pink-soft: #ff80ab;
+            --pink-deep: #ff4b8a;
+            --chem-blue: #81d4fa;
+            --glass: rgba(255, 255, 255, 0.85);
             --font-main: 'Quicksand', sans-serif;
+            /* Rostinho da Hello Kitty com Óculos (image_8) como cursor padrão */
+            --cursor-kitty: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="55" r="35" fill="white" stroke="black" stroke-width="2"/><circle cx="35" cy="45" r="4" fill="black"/><circle cx="65" cy="45" r="4" fill="black"/><ellipse cx="50" cy="52" rx="5" ry="3" fill="%23ffcc00"/><path d="M15 35 Q 25 10 40 25" fill="white" stroke="black" stroke-width="2"/><path d="M85 35 Q 75 10 60 25" fill="white" stroke="black" stroke-width="2"/><rect x="65" y="20" width="15" height="10" rx="5" fill="%23ff4b8a"/><rect x="25" y="40" width="50" height="15" rx="5" fill="none" stroke="black" stroke-width="2"/><line x1="25" y1="47" x2="15" y2="47" stroke="black" stroke-width="2"/><line x1="75" y1="47" x2="85" y2="47" stroke="black" stroke-width="2"/></svg>') 10 10, auto;
         }
-
-        /* --- TELA DE CARREGAMENTO (SPLASH) --- */
-        #loader {
-            position: fixed; width: 100%; height: 100%; background: white;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10000; transition: opacity 0.6s ease;
-        }
-        #loader img { width: 140px; border-radius: 20px; }
-        #loader p { font-family: var(--font-main); color: var(--pink-primary); font-weight: 700; margin-top: 15px; letter-spacing: 1px; }
 
         body {
             margin: 0; font-family: var(--font-main);
-            background: var(--bg-light); color: #333;
-            transition: background 0.5s, color 0.5s; min-height: 100vh;
-            -webkit-tap-highlight-color: transparent;
+            background-color: #fdf6f9;
+            background-image: radial-gradient(#ffdfec 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #444; min-height: 100vh; transition: 0.5s;
+            cursor: var(--cursor-kitty);
+            padding-bottom: 120px;
         }
 
-        /* CONFIGURAÇÕES DO MODO NOTURNO */
-        .dark { background: var(--bg-dark); color: #e0e0e0; }
-        .dark header, .dark .habits-container, .dark .task-row { 
-            background: #252545; color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        .dark {
+            background-color: #1a1a2e;
+            background-image: radial-gradient(rgba(255,128,171,0.1) 1px, transparent 1px);
+            color: #eee;
         }
-        .dark input { color: white; }
-        .dark button { background: #32325d; color: #ff80ab; }
 
+        /* --- UI GLASSMORPHISM --- */
         header {
-            background: white; padding: 25px 15px;
-            box-shadow: 0 4px 25px rgba(255, 75, 138, 0.12);
-            position: sticky; top: 0; z-index: 100; text-align: center;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            background: var(--glass); backdrop-filter: blur(10px);
+            padding: 20px; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+            box-shadow: 0 8px 32px rgba(255, 75, 138, 0.15);
+            position: sticky; top: 0; z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .dark header { background: rgba(37, 37, 69, 0.85); border-color: rgba(255, 255, 255, 0.05); }
+
+        /* --- DASHBOARD COM ROSTINHO COM ÓCULOS (image_8) --- */
+        .status-card {
+            background: white; border-radius: 25px; padding: 15px;
+            width: 90%; max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex; align-items: center; gap: 15px;
+            border: 2px solid var(--chem-blue);
+            position: relative;
+        }
+        /* Rostinho da Kitty com Óculos no canto do card */
+        .status-card::after {
+            content: ''; position: absolute; top: -15px; right: -15px;
+            width: 40px; height: 40px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='55' r='35' fill='white' stroke='black' stroke-width='2'/%3E%3Ccircle cx='35' cy='45' r='4' fill='black'/%3E%3Ccircle cx='65' cy='45' r='4' fill='black'/%3E%3Cellipse cx='50' cy='52' rx='5' ry='3' fill='%23ffcc00'/%3E%3Cpath d='M15 35 Q 25 10 40 25' fill='white' stroke='black' stroke-width='2'/%3E%3Cpath d='M85 35 Q 75 10 60 25' fill='white' stroke='black' stroke-width='2'/%3E%3Crect x='65' y='20' width='15' height='10' rx='5' fill='%23ff4b8a'/%3E%3Crect x='25' y='40' width='50' height='15' rx='5' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='25' y1='47' x2='15' y2='47' stroke='black' stroke-width='2'/%3E%3Cline x1='75' y1='47' x2='85' y2='47' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+            background-size: contain;
+        }
+        .dark .status-card { background: #2c2c4d; }
+
+        .xp-ring {
+            width: 55px; height: 55px; border-radius: 50%;
+            border: 5px solid #eee; border-top-color: var(--pink-deep);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; color: var(--pink-deep);
         }
 
-        h1 { font-size: 1.4rem; margin: 0; color: var(--pink-primary); font-weight: 700; }
-
-        .progress-container {
-            width: 80%; background: #eee; height: 10px; border-radius: 20px;
-            margin: 15px auto; overflow: hidden;
-        }
-        #progress-bar {
-            width: 0%; height: 100%; background: linear-gradient(90deg, #ff80ab, var(--pink-primary));
-            transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        /* GIF DORMIR */
-        #kitty-sleep { 
-            display: none; width: 110px; margin: 15px auto; 
-            border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        /* --- BARRA DE PROGRESSO COM KITTY CIENTISTA (image_7) --- */
+        .progress-area { width: 100%; margin: 25px 0 10px 0; position: relative; }
+        
+        #kitty-walker {
+            width: 50px; position: absolute; bottom: 10px;
+            left: 0%; transform: translateX(-50%);
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            z-index: 10;
         }
 
-        .habits-container {
-            background: white; margin: 20px 15px; padding: 20px;
-            border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        .bar-bg {
+            height: 12px; background: #eee; border-radius: 20px;
+            overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--pink-soft);
         }
 
-        .menu {
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 12px; padding: 15px; max-width: 500px; margin: auto;
+        #bar-fill {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, var(--chem-blue), var(--pink-deep));
+            border-radius: 20px; transition: 1s;
         }
 
-        button {
-            background: white; border: none; padding: 16px;
+        /* --- BOTÕES FOFO-PROFISSIONAIS --- */
+        .btn-action {
+            border: none; border-radius: 18px; padding: 12px 20px;
+            font-family: var(--font-main); font-weight: 700; cursor: pointer;
+            transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            font-size: 14px;
+        }
+        .btn-pink { background: var(--pink-deep); color: white; box-shadow: 0 4px 10px rgba(255, 75, 138, 0.3); }
+        .btn-pink:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 75, 138, 0.5); }
+        
+        .btn-secondary { background: white; color: var(--pink-deep); border: 2px solid var(--pink-soft); }
+        .dark .btn-secondary { background: #2c2c4d; border-color: rgba(255,255,255,0.1); color: white; }
+
+        /* --- CARDS DE TAREFAS COM DETALHES QUÍMICOS --- */
+        .task-card {
+            background: var(--glass); margin-bottom: 12px; padding: 18px;
+            border-radius: 20px; display: flex; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 2px solid transparent; transition: 0.3s;
+            position: relative;
+        }
+        .task-card:hover { border-color: var(--chem-blue); transform: translateX(5px); }
+        .dark .task-card { background: rgba(37, 37, 69, 0.8); }
+
+        /* Icone de átomo flutuando no fundo do card */
+        .task-card::before {
+            content: '⚛️'; position: absolute; font-size: 40px; opacity: 0.05;
+            right: 10px; top: 10px; pointer-events: none;
+        }
+
+        /* CHECKBOX CUSTOMIZADO (Rostinho da Kitty com Óculos) */
+        .checkbox-custom {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid var(--pink-soft); cursor: pointer;
+            appearance: none; transition: 0.2s; position: relative;
+            background: white;
+        }
+        .checkbox-custom:checked {
+            border-color: var(--pink-deep);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='55' r='35' fill='white' stroke='none'/%3E%3Ccircle cx='35' cy='45' r='4' fill='black'/%3E%3Ccircle cx='65' cy='45' r='4' fill='black'/%3E%3Cellipse cx='50' cy='52' rx='5' ry='3' fill='%23ffcc00'/%3E%3Cpath d='M15 35 Q 25 10 40 25' fill='white' stroke='none'/%3E%3Cpath d='M85 35 Q 75 10 60 25' fill='white' stroke='none'/%3E%3Crect x='65' y='20' width='15' height='10' rx='5' fill='%23ff4b8a'/%3E%3Crect x='25' y='40' width='50' height='15' rx='5' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='25' y1='47' x2='15' y2='47' stroke='black' stroke-width='2'/%3E%3Cline x1='75' y1='47' x2='85' y2='47' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+            background-size: cover;
+        }
+
+        /* --- KITTY PIXEL ART (image_5) - Roaming e Interativa --- */
+        #kitty-pet {
+            position: fixed; width: 70px; z-index: 9999;
+            pointer-events: auto; cursor: grab;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        #kitty-pet:active { cursor: grabbing; }
+
+        /* --- GRID DE DIAS COM Rostinhos COM ÓCULOS --- */
+        .day-btn {
+            background: white; border: 2px solid #ffdfec; padding: 15px;
             border-radius: 20px; font-family: var(--font-main); font-weight: 700;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            color: var(--pink-primary); transition: transform 0.2s, background 0.2s;
+            color: var(--pink-deep); cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        button:active { transform: scale(0.95); }
-
-        .task-row {
-            display: flex; align-items: center; background: white;
-            margin-bottom: 12px; padding: 16px; border-radius: 22px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
-        .task-row input[type="text"] {
-            flex: 1; border: none; background: transparent; outline: none;
-            margin-left: 12px; font-family: var(--font-main); font-size: 1rem;
+        .day-btn:hover { background: #ffdfec; border-color: var(--pink-soft); }
+        .dark .day-btn { background: #2c2c4d; border-color: rgba(255,255,255,0.05); color: white; }
+        .day-btn::before {
+            content: ''; width: 20px; height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='55' r='35' fill='white' stroke='black' stroke-width='2'/%3E%3Ccircle cx='35' cy='45' r='4' fill='black'/%3E%3Ccircle cx='65' cy='45' r='4' fill='black'/%3E%3Cellipse cx='50' cy='52' rx='5' ry='3' fill='%23ffcc00'/%3E%3Cpath d='M15 35 Q 25 10 40 25' fill='white' stroke='black' stroke-width='2'/%3E%3Cpath d='M85 35 Q 75 10 60 25' fill='white' stroke='black' stroke-width='2'/%3E%3Crect x='65' y='20' width='15' height='10' rx='5' fill='%23ff4b8a'/%3E%3Crect x='25' y='40' width='50' height='15' rx='5' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='25' y1='47' x2='15' y2='47' stroke='black' stroke-width='2'/%3E%3Cline x1='75' y1='47' x2='85' y2='47' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+            background-size: contain;
         }
 
-        .done { text-decoration: line-through; opacity: 0.35; filter: grayscale(1); }
+        /* --- ANIMAÇÕES --- */
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: popIn 0.4s ease-out; }
 
-        /* KITTY FLUTUANTE */
-        .kitty-float {
-            position: fixed; bottom: 25px; left: 25px; width: 65px;
-            z-index: 999; cursor: pointer; filter: drop-shadow(0 8px 15px rgba(255, 75, 138, 0.3));
+        /* Notificação Toast Fofa */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--pink-deep); color: white; padding: 12px 25px;
+            border-radius: 50px; transition: 0.5s; z-index: 10000; font-weight: 600;
+            box-shadow: 0 5px 20px rgba(255, 75, 138, 0.4);
+            display: flex; align-items: center; gap: 8px;
         }
-        .jump { animation: jumpAnim 0.6s ease; }
-        @keyframes jumpAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-45px) rotate(8deg); } }
+        #toast::before { content: '🎀'; }
 
-        /* FEEDBACK VISUAL */
-        .pop-text {
-            position: fixed; font-weight: bold; color: var(--pink-primary);
-            pointer-events: none; z-index: 10000; animation: popUp 1s forwards;
-            font-size: 1.2rem;
-        }
-        @keyframes popUp { 
-            0% { opacity:0; transform: translateY(0); } 
-            50% { opacity:1; } 
-            100% { opacity:0; transform: translateY(-50px); } 
-        }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <img src="https://media.tenor.com/7YV8-f4uB_oAAAAM/hello-kitty-excited.gif" alt="Loading">
-    <p>Sincronizando elétrons... ⚡</p>
+<div id="loader" style="position:fixed; width:100%; height:100%; background:white; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:0.5s;">
+    <img src="https://i.pinimg.com/originals/e8/3c/6f/e83c6f0590c7414777d94f981a8126b9.gif" style="width: 150px;">
+    <p style="font-family:var(--font-main); color:var(--pink-deep); font-weight:700;">Sincronizando elétrons fofos... ⚛️🎀</p>
 </div>
 
 <header>
-    <h1 id="main-title">🧪 Lia's Lab Planner 🎀</h1>
-    <div class="progress-container"><div id="progress-bar"></div></div>
-    
-    <img id="kitty-sleep" src="https://i.pinimg.com/originals/a3/56/1d/a3561dce1aa8b0107ce7f52bbfb05d06.gif">
+    <div class="status-card animate-pop">
+        <div class="xp-ring" id="xp-circle">0%</div>
+        <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--chem-blue); letter-spacing: 1px;" id="rank-name">ESTAGIÁRIA 🧪</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--pink-deep);">Lia's Kitty Lab</div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 8px;">
+            <button class="btn-action btn-secondary" onclick="toggleMute()" id="mute-btn" style="padding: 10px; border-radius: 12px;">🔊</button>
+            <button class="btn-action btn-secondary" onclick="toggleDark()" style="padding: 10px; border-radius: 12px;">🌙</button>
+        </div>
+    </div>
 
-    <div id="motivation-msg" style="font-size: 14px; color: #888; font-weight: 700; margin: 10px 0; min-height: 20px;"></div>
-
-    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 5px;">
-        <button onclick="toggleDark()" style="font-size: 13px; padding: 10px 15px;">🌙 Modo Soneca</button>
-        <button onclick="syncCloud()" style="background:var(--pink-primary); color:white; font-size: 13px; padding: 10px 15px;">☁️ Backup</button>
+    <div class="progress-area">
+        <img id="kitty-walker" src="https://media.tenor.com/1-T7K-L0P0YAAAAi/hello-kitty-walk.gif">
+        <div class="bar-bg"><div id="bar-fill"></div></div>
     </div>
 </header>
 
-<div id="home-view">
-    <div class="habits-container">
-        <h3 style="margin:0 0 15px 0; color:var(--pink-primary); font-size: 1.1rem;">🔬 Reações de Hoje</h3>
+<div id="toast">Fórmula estabilizada! 🧪</div>
+
+<img id="kitty-pet" src="https://media.tenor.com/l_W2YvPqGfEAAAAi/hello-kitty-sanrio.gif" onclick="playWithKitty()">
+
+<main style="padding: 20px; max-width: 600px; margin: 0 auto;">
+    <div id="home-view" class="animate-pop">
+        <h3 style="color: var(--pink-deep); display: flex; align-items: center; gap: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='30' y='10' width='40' height='70' rx='5' fill='%2381d4fa' opacity='0.8'/%3E%3Cpath d='M40 20 L60 20 Q65 20 65 25 L65 75 Q65 80 60 80 L40 80 Q35 80 35 75 L35 25 Q35 20 40 20 Z' fill='none' stroke='black' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff4b8a'/%3E%3C/svg%3E" style="width:25px;">
+            Reagentes do Dia (Hábitos)
+        </h3>
         <div id="habits-list"></div>
+        <button class="btn-action btn-pink" onclick="addHabit()" style="width: 100%; justify-content: center; margin-top: 15px;">
+            <span>➕⚛️</span> Adicionar Nova Reação
+        </button>
+
+        <h3 style="color: var(--pink-deep); margin-top: 30px;">📅 Bancada de Trabalho</h3>
+        <div id="day-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
+        
+        <button class="btn-action btn-secondary" onclick="forceBackup()" style="width: 100%; justify-content: center; margin-top: 20px; font-size: 12px; padding: 10px;">
+            ☁️🎀 Salvar Cópia de Segurança na Nuvem
+        </button>
     </div>
-    <div class="menu" id="day-menu"></div>
-</div>
 
-<div id="planner" style="display:none; padding: 15px;">
-    <h2 id="title" style="text-align:center; color:var(--pink-primary); font-weight: 700;"></h2>
-    <div id="task-list"></div>
-    <button onclick="goBack()" style="width:100%; margin-top:25px; background:#f0f0f0; color:#666;">🔙 Menu Inicial</button>
-</div>
-
-<img class="kitty-float" id="kitty-main" src="https://raw.githubusercontent.com/Arkanon/hello-kitty/master/hello-kitty.png" onclick="kittyJump()">
+    <div id="planner-view" style="display: none;" class="animate-pop">
+        <div style="display: flex; align-items: center; margin-bottom: 25px; background: var(--glass); padding: 15px; border-radius: 20px; box-shadow: var(--shadow);">
+            <button onclick="goBack()" style="background: none; border: none; font-size: 24px; cursor: pointer;">🔙</button>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='55' r='35' fill='white' stroke='black' stroke-width='2'/%3E%3Ccircle cx='35' cy='45' r='4' fill='black'/%3E%3Ccircle cx='65' cy='45' r='4' fill='black'/%3E%3Cellipse cx='50' cy='52' rx='5' ry='3' fill='%23ffcc00'/%3E%3Cpath d='M15 35 Q 25 10 40 25' fill='white' stroke='black' stroke-width='2'/%3E%3Cpath d='M85 35 Q 75 10 60 25' fill='white' stroke='black' stroke-width='2'/%3E%3Crect x='65' y='20' width='15' height='10' rx='5' fill='%23ff4b8a'/%3E%3Crect x='25' y='40' width='50' height='15' rx='5' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='25' y1='47' x2='15' y2='47' stroke='black' stroke-width='2'/%3E%3Cline x1='75' y1='47' x2='85' y2='47' stroke='black' stroke-width='2'/%3E%3C/svg%3E" style="width:30px; margin-left:15px;">
+            <h2 id="day-title" style="margin: 0 0 0 10px; color: var(--pink-deep); font-weight: 700;"></h2>
+        </div>
+        <div id="task-list"></div>
+    </div>
+</main>
 
 <script>
-    const hours = ["08:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00"];
-    const habits = ["Beber H2O 💧", "Skincare 🧴", "Estudo Químico 📖", "Organizar Lab ✨"];
-    const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-    let currentDay = "";
-
-    window.onload = () => {
-        // Remove tela de loading
-        setTimeout(() => {
-            const loader = document.getElementById('loader');
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 600);
-        }, 1800);
-
-        checkEvents();
-        renderMenu();
-        renderHabits();
-        updateProgress();
+    // --- DATABASE & SOUNDS PRO ---
+    // Usando sons mais "limpos" e profissionais, mas ainda fofos
+    const sounds = {
+        pop: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'), // Som de bolha (química)
+        level: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'), // Harpa fofa
+        click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3') // Clique suave
     };
 
-    function renderMenu() {
-        const menu = document.getElementById('day-menu');
-        menu.innerHTML = "";
-        days.forEach(d => {
-            let btn = document.createElement('button');
-            btn.innerText = d;
-            btn.onclick = () => openDay(d);
-            menu.appendChild(btn);
-        });
+    let state = {
+        xp: parseInt(localStorage.getItem('kitty_pro_xp')) || 0,
+        muted: localStorage.getItem('kitty_muted') === 'true',
+        habits: JSON.parse(localStorage.getItem('kitty_pro_habits')) || ["Hidratação H2O 💧", "Skincare Facial 🧴", "Estudo Química 📖"],
+        currentDay: null,
+        darkMode: localStorage.getItem('kitty_dark') === 'true'
+    };
+
+    // Níveis personalizados para Engenharia Química
+    const RANKS = [
+        { xp: 0, name: "ESTAGIÁRIA 🧪" },
+        { xp: 150, name: "LABORATORISTA ⚗️" },
+        { xp: 400, name: "ANALISTA JÚNIOR 🔬" },
+        { xp: 800, name: "ENGENHEIRA PLENA 🎓⚛️" },
+        { xp: 1500, name: "MESTRA DE PROCESSOS 🎀🏆" }
+    ];
+
+    window.onload = () => {
+        // Remove loader
+        setTimeout(() => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+        }, 2000);
+
+        // Aplica configurações salvas
+        if(state.darkMode) document.body.classList.add('dark');
+        document.getElementById('mute-btn').innerText = state.muted ? "🔇" : "🔊";
+
+        initKittyRoaming();
+        renderHome();
+        updateLevel(false); // Carrega nível sem tocar som
+        autoSaveLoop();
+    };
+
+    // --- CORE ENGINE PRO ---
+    function renderHome() {
+        const list = document.getElementById('habits-list');
+        list.innerHTML = state.habits.map((h, i) => `
+            <div class="task-card animate-pop">
+                <input type="checkbox" class="checkbox-custom" ${getStatus('h', i)} onclick="toggleHabit(${i})">
+                <input type="text" value="${h}" onchange="editHabit(${i}, this.value)" 
+                    style="border:none; background:none; margin-left:15px; font-family:var(--font-main); font-weight:600; flex:1; outline:none; color:inherit; font-size:15px;">
+                <button onclick="deleteHabit(${i})" style="background:none; border:none; color:#ffbcbc; cursor:pointer; font-size:16px;">✕</button>
+            </div>
+        `).join('');
+
+        const grid = document.getElementById('day-grid');
+        const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+        grid.innerHTML = days.map(d => `
+            <button class="btn-action day-btn" onclick="openDay('${d}')">${d}</button>
+        `).join('');
     }
 
-    function checkEvents() {
-        const now = new Date();
-        const m = now.getMonth() + 1;
-        const d = now.getDate();
-        const title = document.getElementById('main-title');
-        const msg = document.getElementById('motivation-msg');
-
-        const sciencePhrases = [
-            "Lia, você é a solução perfeita! 🧪",
-            "Mantenha a energia de ativação! ⚡",
-            "Equilibrando a vida com doçura... ⚖️",
-            "Pronta para novos experimentos? ✨",
-            "Você brilha mais que reações de luminescência! 💎"
-        ];
+    function updateLevel(playSound = true) {
+        // Encontra o rank atual
+        const rankIndex = [...RANKS].reverse().findIndex(r => state.xp >= r.xp);
+        const actualIndex = RANKS.length - 1 - rankIndex;
+        const rank = RANKS[actualIndex];
         
-        let selectedMsg = sciencePhrases[Math.floor(Math.random() * sciencePhrases.length)];
+        // Compara com o rank antigo para som de level up
+        const oldRankName = document.getElementById('rank-name').innerText;
+        document.getElementById('rank-name').innerText = rank.name;
+        
+        if (playSound && oldRankName !== "" && oldRankName !== rank.name && rankIndex !== -1) {
+            playSnd('level');
+            showToast(`🚀 NÍVEL UP: ${rank.name}`);
+        }
+        
+        // Círculo de XP (mostra progresso para o próximo nível)
+        const nextRank = RANKS[actualIndex + 1] || rank;
+        const progress = rank === nextRank ? 100 : ((state.xp - rank.xp) / (nextRank.xp - rank.xp)) * 100;
+        document.getElementById('xp-circle').innerText = Math.floor(progress) + "%";
+        // Ajusta a borda do círculo (CSS dinâmico simples)
+        document.getElementById('xp-circle').style.borderTopColor = progress > 0 ? 'var(--pink-deep)' : '#eee';
 
-        // DATAS ESPECIAIS
-        if (m === 10 && d === 24) {
-            title.innerText = "🎂 HAPPY B-DAY LIA! 🥳";
-            selectedMsg = "Parabéns, Engenheira! Muitas fórmulas de amor! 💖";
-            confettiEffect();
-        } else if (m === 6 && d === 18) {
-            title.innerText = "🧪 Dia do Químico! ⚗️";
-            selectedMsg = "Parabéns pela sua profissão incrível! 🧬";
-        } else if (m === 12 && d >= 24) {
-            title.innerText = "🎄 Lia's Xmas Lab 🎅";
+        updateProgressBar();
+        localStorage.setItem('kitty_pro_xp', state.xp);
+    }
+
+    function updateProgressBar() {
+        // Calcula progresso baseado em hábitos + tarefas do dia aberto
+        let totalHabits = state.habits.length;
+        let doneHabits = state.habits.filter((_, i) => localStorage.getItem('kitty_h_'+i) === 'true').length;
+        
+        let totalTasks = 0;
+        let doneTasks = 0;
+        if(state.currentDay) {
+            totalTasks = 5; // 5 horários fixos
+            for(let i=0; i<5; i++) if(localStorage.getItem(`kitty_t_${state.currentDay}_${i}`) === 'true') doneTasks++;
         }
 
-        msg.innerText = selectedMsg;
+        let total = totalHabits + totalTasks;
+        let done = doneHabits + doneTasks;
+        
+        const perc = total === 0 ? 0 : (done / total) * 100;
+        document.getElementById('bar-fill').style.width = perc + "%";
+        document.getElementById('kitty-walker').style.left = perc + "%";
     }
 
-    function toggleDark() {
-        const isDark = document.body.classList.toggle("dark");
-        document.getElementById('kitty-sleep').style.display = isDark ? "block" : "none";
-    }
-
-    function renderHabits() {
-        let html = "";
-        habits.forEach(h => {
-            let checked = localStorage.getItem('habit_'+h) === 'true';
-            html += `<div class="habit-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(0,0,0,0.04);">
-                <span style="font-weight:600;">${h}</span>
-                <input type="checkbox" style="width:22px; height:22px; accent-color:var(--pink-primary);" ${checked ? 'checked' : ''} onclick="toggleHabit('${h}')">
-            </div>`;
-        });
-        document.getElementById('habits-list').innerHTML = html;
-    }
-
-    function toggleHabit(h) {
-        let val = localStorage.getItem('habit_'+h) === 'true';
-        localStorage.setItem('habit_'+h, !val);
-        updateProgress();
-        if(!val) { kittyJump(); showPoint(); }
-    }
-
-    function openDay(day) {
-        currentDay = day;
-        document.getElementById('home-view').style.display = "none";
-        document.getElementById('planner').style.display = "block";
-        document.getElementById('title').innerText = "🔬 " + day;
-        renderTasks();
-    }
-
-    function renderTasks() {
-        let html = "";
-        hours.forEach((h, i) => {
-            let val = localStorage.getItem(currentDay + i) || "";
-            let done = localStorage.getItem(currentDay + i + '_done') === 'true';
-            html += `<div class="task-row">
-                <input type="checkbox" style="width:20px; height:20px; accent-color:var(--pink-primary);" ${done ? 'checked' : ''} onchange="toggleTask(${i}, this)">
-                <input type="text" class="${done ? 'done' : ''}" value="${val}" placeholder="${h}..." oninput="saveTask(${i}, this.value)">
-            </div>`;
-        });
-        document.getElementById('task-list').innerHTML = html;
-    }
-
-    function toggleTask(i, el) {
-        localStorage.setItem(currentDay + i + '_done', el.checked);
-        el.nextElementSibling.classList.toggle('done');
-        updateProgress();
-        if(el.checked) { kittyJump(); showPoint(); }
-    }
-
-    function updateProgress() {
-        let total = habits.length + (currentDay ? hours.length : 0);
-        let done = habits.filter(h => localStorage.getItem('habit_'+h) === 'true').length;
-        if(currentDay) {
-            hours.forEach((_, i) => { if(localStorage.getItem(currentDay + i + '_done') === 'true') done++; });
+    // --- INTERAÇÕES PRO ---
+    function toggleHabit(i) {
+        const key = 'kitty_h_'+i;
+        const isChecked = localStorage.getItem(key) === 'true';
+        const newState = !isChecked;
+        localStorage.setItem(key, newState);
+        
+        if(newState) { 
+            playSnd('pop'); 
+            addXP(15); // Hábitos dão mais XP
+            kittyJump();
+        } else {
+            addXP(-15);
         }
-        let perc = (done / total) * 100 || 0;
-        document.getElementById('progress-bar').style.width = perc + "%";
+        updateProgressBar();
+    }
+
+    function addXP(val) {
+        state.xp = Math.max(0, state.xp + val); // Não deixa XP ser negativo
+        updateLevel();
+    }
+
+    function playSnd(name) { 
+        if(!state.muted && sounds[name]) {
+            sounds[name].currentTime = 0; // Reinicia o som se já estiver tocando
+            sounds[name].play().catch(()=>{}); // Evita erro de auto-play bloqueado
+        } 
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.transform = "translateX(-50%) translateY(0)";
+        setTimeout(() => t.style.transform = "translateX(-50%) translateY(100px)", 2500);
+    }
+
+    // --- KITTY ROAMING & PET PRO (Pixel image_5) ---
+    function initKittyRoaming() {
+        const kitty = document.getElementById('kitty-pet');
+        let x = Math.random() * 80 + 10;
+        let y = Math.random() * 20 + 70;
+        kitty.style.left = x + "%";
+        kitty.style.top = y + "%";
+        
+        // Movimento aleatório suave
+        setInterval(() => {
+            // Só move se não estiver interagindo (segurando)
+            if(document.activeElement !== kitty) {
+                const oldX = parseFloat(kitty.style.left);
+                x = Math.random() * 80 + 10;
+                y = Math.random() * 20 + 70;
+                
+                // Gira a Kitty dependendo da direção
+                kitty.style.transform = x > oldX ? "scaleX(1)" : "scaleX(-1)";
+                
+                kitty.style.transition = "all 4s ease-in-out";
+                kitty.style.left = x + "%";
+                kitty.style.top = y + "%";
+            }
+        }, 10000);
+    }
+
+    function playWithKitty() {
+        playSnd('click');
+        const kitty = document.getElementById('kitty-pet');
+        kitty.style.transition = "transform 0.2s";
+        kitty.style.transform = "scale(1.3) translateY(-10px)";
+        
+        const msgs = [
+            "Lia, sua bancada está linda! ⚗️",
+            "Miau! Vamos estabilizar essa fórmula? ⚛️",
+            "Adoro ver você estudando! 📖🎀",
+            "Você é a melhor engenheira! 🎓",
+            "Não esquece de beber H2O! 💧"
+        ];
+        showToast(msgs[Math.floor(Math.random() * msgs.length)]);
+        
+        setTimeout(() => kitty.style.transform = "scale(1) translateY(0)", 300);
+        addXP(1); // Ganha 1 XP por carinho
     }
 
     function kittyJump() {
-        const k = document.getElementById('kitty-main');
-        k.classList.add('jump');
-        setTimeout(() => k.classList.remove('jump'), 600);
+        const k = document.getElementById('kitty-pet');
+        k.style.transition = "transform 0.3s";
+        k.style.transform = "translateY(-30px) scale(1.1)";
+        setTimeout(() => k.style.transform = "translateY(0) scale(1)", 300);
     }
 
-    function showPoint() {
-        const p = document.createElement("div");
-        p.className = "pop-text";
-        p.innerText = "⭐ +10 pts";
-        p.style.left = "50%"; p.style.top = "50%";
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 1000);
+    // --- NAVEGAÇÃO & PLANEJAMENTO PRO ---
+    function openDay(day) {
+        state.currentDay = day;
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('planner-view').style.display = 'block';
+        document.getElementById('day-title').innerText = `Bancada de ${day}`;
+        
+        const hours = ["08:00", "11:00", "14:00", "17:00", "20:00"];
+        const taskList = document.getElementById('task-list');
+        taskList.innerHTML = hours.map((h, i) => {
+            const taskId = `kitty_t_${day}_${i}`;
+            const valId = `kitty_val_${day}_${i}`;
+            const isDone = localStorage.getItem(taskId) === 'true';
+            const value = localStorage.getItem(valId) || '';
+            
+            return `
+                <div class="task-card animate-pop" style="animation-delay: ${i * 0.1}s">
+                    <input type="checkbox" class="checkbox-custom" ${isDone ? 'checked' : ''} 
+                        onclick="toggleTask('${day}', ${i})">
+                    <div style="margin-left:15px; flex:1;">
+                        <div style="font-size:11px; font-weight:700; color:var(--chem-blue); border-bottom:1px solid #ffdfec; display:inline-block; padding-bottom:2px; margin-bottom:5px;">
+                            ⏰ ${h} - Reação Agendada
+                        </div>
+                        <input type="text" placeholder="Descreva o experimento ou tarefa..." value="${value}"
+                            oninput="localStorage.setItem('${valId}', this.value)"
+                            style="border:none; background:none; font-family:var(--font-main); font-weight:600; width:100%; outline:none; color:inherit; font-size:14px;">
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        window.scrollTo(0, 0);
+        updateProgressBar();
     }
 
-    function goBack() {
-        document.getElementById('home-view').style.display = "block";
-        document.getElementById('planner').style.display = "none";
-        currentDay = "";
-        updateProgress();
+    function toggleTask(day, i) {
+        const key = `kitty_t_${day}_${i}`;
+        const isChecked = localStorage.getItem(key) === 'true';
+        const newState = !isChecked;
+        localStorage.setItem(key, newState);
+        
+        if(newState) { 
+            playSnd('pop'); 
+            addXP(5); 
+            kittyJump();
+        } else {
+            addXP(-5);
+        }
+        updateProgressBar();
     }
 
-    function saveTask(i, v) { localStorage.setItem(currentDay + i, v); }
-
-    function syncCloud() {
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(localStorage))));
-        navigator.clipboard.writeText(window.location.href.split('?')[0] + "?data=" + encoded);
-        alert("🧪 Reação Estabilizada! Link de backup copiado para a área de transferência.");
+    function goBack() { 
+        document.getElementById('home-view').style.display = 'block'; 
+        document.getElementById('planner-view').style.display = 'none';
+        state.currentDay = null; 
+        updateProgressBar();
+        window.scrollTo(0, 0);
     }
 
-    function confettiEffect() {
-        for(let i=0; i<15; i++) {
-            let c = document.createElement("div");
-            c.innerText = "🎉";
-            c.style.position = "fixed";
-            c.style.left = Math.random() * 100 + "vw";
-            c.style.top = "-20px";
-            c.style.fontSize = "25px";
-            c.style.transition = "transform 3s linear";
-            document.body.appendChild(c);
-            setTimeout(() => c.style.transform = `translateY(${window.innerHeight + 50}px)`, 100);
-            setTimeout(() => c.remove(), 3500);
+    // --- SISTEMA DE BACKUP & SALVAMENTO PRO ---
+    function autoSaveLoop() {
+        setInterval(() => {
+            localStorage.setItem('kitty_pro_habits', JSON.stringify(state.habits));
+            // Feedback visual sutil no console para desenvolvedor
+            console.log("⚛️ Lia's Lab: Auto-save químico realizado.");
+        }, 10000); // Salva a cada 10s
+    }
+
+    function forceBackup() {
+        playSnd('click');
+        const backupData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('kitty_')) {
+                backupData[key] = localStorage.getItem(key);
+            }
+        }
+        const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
+        navigator.clipboard.writeText(encodedData).then(() => {
+            showToast("🎀 Cópia de segurança copiada! Cole em um local seguro.");
+        });
+    }
+
+    // --- CONFIGURAÇÕES & EDITE ---
+    function getStatus(type, i) { return localStorage.getItem(`kitty_${type}_${i}`) === 'true' ? 'checked' : ''; }
+    
+    function toggleMute() { 
+        state.muted = !state.muted; 
+        localStorage.setItem('kitty_muted', state.muted);
+        document.getElementById('mute-btn').innerText = state.muted ? "🔇" : "🔊"; 
+        showToast(state.muted ? "Sons desativados 😶" : "Sons ativados 🔊");
+    }
+    
+    function toggleDark() { 
+        state.darkMode = document.body.classList.toggle('dark'); 
+        localStorage.setItem('kitty_dark', state.darkMode);
+        showToast(state.darkMode ? "Modo Noite Ativado 🌙" : "Modo Dia Ativado ☀️");
+    }
+    
+    function editHabit(i, v) { state.habits[i] = v; }
+    
+    function addHabit() { 
+        playSnd('click');
+        state.habits.push("Novo Reagente ⚗️"); 
+        renderHome(); 
+        updateProgressBar();
+        showToast("Novo hábito adicionado à bancada!");
+    }
+    
+    function deleteHabit(i) { 
+        playSnd('click');
+        if(confirm("Deseja remover este reagente (hábito) permanentemente? 🗑️")) {
+            state.habits.splice(i,1); 
+            localStorage.removeItem('kitty_h_'+i); // Limpa status antigo
+            renderHome(); 
+            updateProgressBar();
+            showToast("Hábito removido.");
         }
     }
+
 </script>
 </body>
 </html>
