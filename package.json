@@ -1,0 +1,8 @@
+{
+  "name": "kitty-lab-api",
+  "version": "1.0.0",
+  "description": "Kitty Lab API - Netlify Functions",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
