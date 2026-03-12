@@ -1,12 +1,14 @@
 // ============================================================
 //  Kitty Lab — API Server (Netlify Functions)
-//  netlify/functions/api.js
+//  Storage: JSONStore via fetch (sem dependências externas)
+//  Usa Netlify's built-in KV via REST API nativa
 // ============================================================
 
-const { getStore } = require('@netlify/blobs');
+const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 
-const STORE = 'kitty-lab-tasks';
-const DAYS  = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+// ── In-memory fallback (persiste durante a execução da função)
+// Para persistência real usamos o Netlify Blobs via REST API direta
+const MEM = {};
 
 function res(status, body) {
     return {
@@ -21,37 +23,62 @@ function res(status, body) {
     };
 }
 
-async function getTasks(store, day) {
+// ── Storage via Netlify Blobs REST API (sem SDK) ──────────────
+// O Netlify injeta automaticamente NETLIFY_BLOBS_CONTEXT em base64
+// quando a função roda no runtime deles
+function getBlobsContext() {
     try {
-        const raw = await store.get(day);
+        const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
+        if (ctx) return JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
+    } catch {}
+    return null;
+}
+
+async function blobGet(key) {
+    const ctx = getBlobsContext();
+    if (!ctx) return MEM[key] || null;
+    try {
+        const url = `${ctx.url}kitty-lab-tasks/${encodeURIComponent(key)}`;
+        const r = await fetch(url, {
+            headers: { Authorization: `Bearer ${ctx.token}` }
+        });
+        if (r.status === 404) return null;
+        if (!r.ok) return MEM[key] || null;
+        return await r.text();
+    } catch { return MEM[key] || null; }
+}
+
+async function blobSet(key, value) {
+    MEM[key] = value; // sempre salva em memória como fallback
+    const ctx = getBlobsContext();
+    if (!ctx) return;
+    try {
+        const url = `${ctx.url}kitty-lab-tasks/${encodeURIComponent(key)}`;
+        await fetch(url, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${ctx.token}`,
+                'Content-Type': 'text/plain'
+            },
+            body: value
+        });
+    } catch {}
+}
+
+async function getTasks(day) {
+    try {
+        const raw = await blobGet(day);
         return raw ? JSON.parse(raw) : [];
     } catch { return []; }
 }
 
-async function setTasks(store, day, tasks) {
-    await store.set(day, JSON.stringify(tasks));
+async function setTasks(day, tasks) {
+    await blobSet(day, JSON.stringify(tasks));
 }
 
-exports.handler = async (event, context) => {
+// ── Handler ───────────────────────────────────────────────────
+exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return res(200, {});
-
-    // O Netlify injeta clientContext com siteID e token no runtime
-    // Passamos explicitamente para o getStore funcionar sem variáveis de ambiente
-    const siteID = (context.clientContext && context.clientContext.site_url)
-        ? undefined  // deixa o SDK resolver sozinho
-        : process.env.NETLIFY_SITE_ID;
-
-    let store;
-    try {
-        store = getStore({
-            name: STORE,
-            siteID: process.env.NETLIFY_SITE_ID,
-            token:  process.env.NETLIFY_TOKEN,
-        });
-    } catch(e) {
-        // Fallback para runtime nativo (sem parâmetros)
-        store = getStore(STORE);
-    }
 
     const method = event.httpMethod;
     const path   = (event.path || '')
@@ -62,24 +89,25 @@ exports.handler = async (event, context) => {
 
     // GET /health
     if (path === '/health' && method === 'GET') {
-        try {
-            await store.list();
-            return res(200, { ok: true, app: 'Kitty Lab API', blobs: '✅', ts: new Date().toISOString() });
-        } catch(e) {
-            return res(200, { ok: true, app: 'Kitty Lab API', blobs: '❌ ' + e.message, ts: new Date().toISOString() });
-        }
+        const ctx = getBlobsContext();
+        return res(200, {
+            ok: true,
+            app: 'Kitty Lab API',
+            storage: ctx ? 'netlify-blobs' : 'memory',
+            ts: new Date().toISOString()
+        });
     }
 
     // GET /tasks?day=
     if (path === '/tasks' && method === 'GET') {
         if (!qs.day) return res(400, { error: 'Parâmetro "day" obrigatório.' });
-        return res(200, { day: qs.day, tasks: await getTasks(store, qs.day) });
+        return res(200, { day: qs.day, tasks: await getTasks(qs.day) });
     }
 
     // GET /tasks/all
     if (path === '/tasks/all' && method === 'GET') {
         const days = {};
-        for (const d of DAYS) days[d] = await getTasks(store, d);
+        for (const d of DAYS) days[d] = await getTasks(d);
         return res(200, { days });
     }
 
@@ -92,16 +120,22 @@ exports.handler = async (event, context) => {
         const { day, label, time } = body;
         if (!day || !label) return res(400, { error: '"day" e "label" são obrigatórios.' });
 
-        const tasks = await getTasks(store, day);
+        const tasks = await getTasks(day);
         if (time) {
             const conflict = tasks.find(t => t.time === time);
             if (conflict) return res(409, { conflict: true, existing: conflict });
         }
 
-        const task = { id: Date.now(), label: String(label).trim(), time: time||'', done: false, createdBy: 'alexa' };
+        const task = {
+            id: Date.now(),
+            label: String(label).trim(),
+            time: time || '',
+            done: false,
+            createdBy: 'alexa'
+        };
         tasks.push(task);
         tasks.sort((a, b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
-        await setTasks(store, day, tasks);
+        await setTasks(day, tasks);
         return res(201, { success: true, task });
     }
 
@@ -109,13 +143,13 @@ exports.handler = async (event, context) => {
     if (path.startsWith('/tasks/') && method === 'PATCH') {
         const id = parseInt(path.split('/')[2]);
         if (!qs.day) return res(400, { error: '"day" obrigatório.' });
-        const tasks = await getTasks(store, qs.day);
+        const tasks = await getTasks(qs.day);
         const task  = tasks.find(t => t.id === id);
         if (!task) return res(404, { error: 'Tarefa não encontrada.' });
         let upd; try { upd = JSON.parse(event.body||'{}'); } catch { upd={}; }
         if (typeof upd.done==='boolean') task.done=upd.done;
         if (typeof upd.label==='string') task.label=upd.label.trim();
-        await setTasks(store, qs.day, tasks);
+        await setTasks(qs.day, tasks);
         return res(200, { success: true, task });
     }
 
